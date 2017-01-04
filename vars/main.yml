@@ -341,6 +341,18 @@ manala_skeleton_patterns:
       - file:     inet-http-server.conf
         template: configs/inet_http_server.{{ manala_skeleton_env }}.j2
 
+  # Manala - Prod
+
+  manala_prod: &pattern_manala_prod
+    # Apt
+    apt_packages:
+      - htop
+      - less
+    # Supervisor
+    supervisor_configs:
+      - file:     inet-http-server.conf
+        template: configs/inet_http_server.{{ manala_skeleton_env }}.j2
+
   # Manala - Nginx - Dev
 
   manala_nginx_dev: &pattern_manala_nginx_dev
@@ -377,6 +389,43 @@ manala_skeleton_patterns:
             - location /404.html:
               - root: /usr/share/manala/html
               - internal;
+
+  # Manala - Nginx - Prod
+
+  manala_nginx_prod: &pattern_manala_nginx_prod
+    # Files
+    files_attributes:
+      - path:  /usr/share/manala/html
+        state: directory
+      - path: /usr/share/manala/html/404.html
+        content: |
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Manala - Error 404</title>
+              <style>
+                body {
+                  width: 35em;
+                  margin: 0 auto;
+                  font-family: Tahoma, Verdana, Arial, sans-serif;
+                }
+              </style>
+            </head>
+            <body>
+              <h1>Manala - Error 404</h1>
+              <p>Not found</p>
+            </body>
+          </html>
+    # Nginx
+    nginx_configs:
+      - file:     default.conf
+        template: configs/server.j2
+        config:
+          - listen:     '* default_server'
+          - error_page: '404 /404.html'
+          - location /404.html:
+            - root: /usr/share/manala/html
+            - internal;
 
   # Manala - Nginx - Test
 
@@ -435,6 +484,43 @@ manala_skeleton_patterns:
               - root: /usr/share/elao/html
               - internal;
 
+  # Elao - Nginx - Prod
+
+  elao_nginx_prod: &pattern_elao_nginx_prod
+    # Files
+    files_attributes:
+      - path:  /usr/share/elao/html
+        state: directory
+      - path: /usr/share/elao/html/404.html
+        content: |
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <title>Elao - Error 404</title>
+              <style>
+                body {
+                  width: 35em;
+                  margin: 0 auto;
+                  font-family: Tahoma, Verdana, Arial, sans-serif;
+                }
+              </style>
+            </head>
+            <body>
+              <h1>Elao - Error 404</h1>
+              <p>Not found</p>
+            </body>
+          </html>
+    # Nginx
+    nginx_configs:
+      - file:     default.conf
+        template: configs/server.j2
+        config:
+          - listen:     '* default_server'
+          - error_page: '404 /404.html'
+          - location /404.html:
+            - root: /usr/share/elao/html
+            - internal;
+
 
 #############
 # Skeletons #
@@ -480,6 +566,44 @@ manala_skeletons:
         -
           # Motd
           motd_message: App - Dev
+          # Oh my zsh
+          ohmyzsh_users:
+            - user:     "{{ manala_skeleton_options.app.user }}"
+              group:    "{{ manala_skeleton_options.app.group }}"
+              template: users/default.{{ manala_skeleton_env }}.j2
+              config:
+                - "[ -d {{ manala_skeleton_options.app.dir }}{{ manala_skeleton_options.app.dir_release }} ] && cd {{ manala_skeleton_options.app.dir }}{{ manala_skeleton_options.app.dir_release }}"
+
+    prod:
+
+      options:
+
+        # Roles
+        motd:         true
+        timezone:     true
+        locales:      true
+        apt:          true
+        ssh:          true
+        make:         true
+        git:          true
+        zsh:          true
+        ohmyzsh:      true
+        vim:          true
+        alternatives: true
+        supervisor:   true
+        cron:         true
+        ntp:          true
+        # App
+        app:
+          env: prod
+
+      patterns:
+        - *pattern_manala
+        - *pattern_manala_prod
+        - *pattern_manala_nginx_prod
+        -
+          # Motd
+          motd_message: App - Prod
           # Oh my zsh
           ohmyzsh_users:
             - user:     "{{ manala_skeleton_options.app.user }}"
@@ -577,6 +701,49 @@ manala_skeletons:
               config:
                 - "[ -d {{ manala_skeleton_options.app.dir }}{{ manala_skeleton_options.app.dir_release }} ] && cd {{ manala_skeleton_options.app.dir }}{{ manala_skeleton_options.app.dir_release }}"
 
+    prod:
+
+      options:
+
+        # Roles
+        motd:              true
+        timezone:          true
+        locales:           true
+        environment:       true
+        apt:               true
+        ssh:               true
+        make:              true
+        git:               true
+        zsh:               true
+        ohmyzsh:           true
+        vim:               true
+        alternatives:      true
+        files:             true
+        supervisor:        true
+        cron:              true
+        ntp:               true
+        nginx:             true
+        php:               true
+        composer:          true
+        # App
+        app:
+          env: prod
+
+      patterns:
+        - *pattern_manala
+        - *pattern_manala_prod
+        - *pattern_manala_nginx_prod
+        -
+          # Motd
+          motd_message: App - Php - Prod
+          # Oh my zsh
+          ohmyzsh_users:
+            - user:     "{{ manala_skeleton_options.app.user }}"
+              group:    "{{ manala_skeleton_options.app.group }}"
+              template: users/php.{{ manala_skeleton_env }}.j2
+              config:
+                - "[ -d {{ manala_skeleton_options.app.dir }}{{ manala_skeleton_options.app.dir_release }} ] && cd {{ manala_skeleton_options.app.dir }}{{ manala_skeleton_options.app.dir_release }}"
+
   ####################
   # Elao - App - Php #
   ####################
@@ -632,6 +799,50 @@ manala_skeletons:
         -
           # Motd
           motd_message: App - Php - Dev
+          # Oh my zsh
+          ohmyzsh_users:
+            - user:     "{{ manala_skeleton_options.app.user }}"
+              group:    "{{ manala_skeleton_options.app.group }}"
+              template: users/php.{{ manala_skeleton_env }}.j2
+              config:
+                - "[ -d {{ manala_skeleton_options.app.dir }}{{ manala_skeleton_options.app.dir_release }} ] && cd {{ manala_skeleton_options.app.dir }}{{ manala_skeleton_options.app.dir_release }}"
+
+    prod:
+
+      options:
+
+        # Roles
+        motd:              true
+        timezone:          true
+        locales:           true
+        environment:       true
+        apt:               true
+        ssh:               true
+        make:              true
+        git:               true
+        zsh:               true
+        ohmyzsh:           true
+        vim:               true
+        alternatives:      true
+        files:             true
+        supervisor:        true
+        cron:              true
+        ntp:               true
+        nginx:             true
+        php:               true
+        composer:          true
+        # App
+        app:
+          env: prod
+
+      patterns:
+        - *pattern_manala
+        - *pattern_manala_prod
+        - *pattern_elao
+        - *pattern_elao_nginx_prod
+        -
+          # Motd
+          motd_message: App - Php - Prod
           # Oh my zsh
           ohmyzsh_users:
             - user:     "{{ manala_skeleton_options.app.user }}"
