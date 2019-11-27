@@ -1,0 +1,5 @@
+---
+
+- name: "{{ test }}"
+  hosts: debian
+  become: true
